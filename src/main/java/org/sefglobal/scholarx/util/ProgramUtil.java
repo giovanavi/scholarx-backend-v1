@@ -44,54 +44,51 @@ public class ProgramUtil {
     public void sendMenteeApplicationEmails(long id, Optional<Program> program) throws IOException, MessagingException {
         List<Mentor> mentors = mentorRepository.findAllByProgramId(id);
 
-        String message;
         for (Mentor mentor : mentors) {
+            String message = null;
 
             if (mentor.getState().name().equals("APPROVED")) {
-
-                message ="Dear" + mentor.getProfile().getName() + ",<br /><br />" +
-                        "I hope this email finds you in high spirits! I am delighted to inform you that you have been selected as a mentor for " + program.get().getTitle() + ", and we extend our heartfelt congratulations to you! <br /><br />" +
-                        "We received a large number of qualified applicants, and after a thorough review of all candidates, we are thrilled to invite you to accept a place in our program. Your profile stood out amongst the others, and we are confident that you will contribute positively to our program.<br /><br />"+
-                        "We understand that your hard work and dedication have brought you to this moment, and we recognize your exceptional talent, experience and potential in your respective fields. We are excited to have you join our community of learners and scholars.<br /><br />" +
-                        "We look forward to seeing the unique perspective and insights you will bring to the mentees and to the program. We believe that you will flourish in this year's edition of ScholarX, and we are thrilled to be a part of your academic or professional journey.<br /><br />" +
-                        "Once again, congratulations on your selection! We cannot wait to have you on board. We will keep you informed on the next steps, and in the meantime would like to invite you to go through some of the resources that would be useful to thrive as a great mentor in  " + program.get().getTitle() + ". <br /><br />" +
-                        " To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
-
-                emailService.sendEmail(mentor.getProfile().getEmail(), StringUtils.capitalize(mentor.getState().name()), message, false);
-
-                SentEmail email = new SentEmail();
-                email.setEmail(mentor.getProfile().getEmail());
-                email.setMessage(message);
-                email.setProgramId(program.get());
-                email.setReceiver(mentor.getProfile());
-                email.setState(program.get().getState());
-                emailRepository.save(email);
-
+                message = buildApprovedEmailMessage(mentor, program.get().getTitle());
             } else if (mentor.getState().name().equals("REJECTED")) {
-
-                message = "Dear " + mentor.getProfile().getName() + ",<br /><br />" +
-                        "I hope this email finds you well. I wanted to take a moment to thank you for your interest in joining " + program.get().getTitle() + " as a mentor and for submitting your application. We appreciate the time and effort you put into it.<br /><br />"+
-                        "After careful review of your application and considering all of the candidates, we regret to inform you that we are unable to make you part of the mentor base at this time. We received a large number "+
-                        "of qualified applicants, and unfortunately, we could only accept a limited number of Mentors.<br /><br />" +
-                        "We understand that this news may be disappointing, and we encourage you to not be discouraged by this decision. Please know that this does not "+
-                        "reflect on your abilities, potential or value as an individual. As you progress ahead on your academic or professional journey, we would be glad to have you as a mentor for future ScholarX programs.<br /><br />"+
-                        "We appreciate your interest in our program and would like to wish you all the best in your future endeavors. We are grateful for the opportunity "+
-                        "to consider you for our program and encourage you to keep pursuing your goals and aspirations.<br /><br />" +
-                        "Thank you again for considering our program and for the time you invested in your application. We hope you find success and fulfillment in your academic and professional pursuits." +
-                        " To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
-
-                emailService.sendEmail(mentor.getProfile().getEmail(), StringUtils.capitalize(mentor.getState().name()), message, false);
-
-                SentEmail email = new SentEmail();
-                email.setEmail(mentor.getProfile().getEmail());
-                email.setMessage(message);
-                email.setProgramId(program.get());
-                email.setReceiver(mentor.getProfile());
-                email.setState(program.get().getState());
-                emailRepository.save(email);
-
+                message = buildRejectedEmailMessage(mentor, program.get().getTitle());
             }
+
+            sendAndSaveEmail(mentor, message, StringUtils.capitalize(mentor.getState().name()), program.get());
         }
+    }
+    private String buildApprovedEmailMessage(Mentor mentor, String programTitle) {
+        String message ="Dear" + mentor.getProfile().getName() + ",<br /><br />" +
+                "I hope this email finds you in high spirits! I am delighted to inform you that you have been selected as a mentor for " + programTitle + ", and we extend our heartfelt congratulations to you! <br /><br />" +
+                "We received a large number of qualified applicants, and after a thorough review of all candidates, we are thrilled to invite you to accept a place in our program. Your profile stood out amongst the others, and we are confident that you will contribute positively to our program.<br /><br />"+
+                "We understand that your hard work and dedication have brought you to this moment, and we recognize your exceptional talent, experience and potential in your respective fields. We are excited to have you join our community of learners and scholars.<br /><br />" +
+                "We look forward to seeing the unique perspective and insights you will bring to the mentees and to the program. We believe that you will flourish in this year's edition of ScholarX, and we are thrilled to be a part of your academic or professional journey.<br /><br />" +
+                "Once again, congratulations on your selection! We cannot wait to have you on board. We will keep you informed on the next steps, and in the meantime would like to invite you to go through some of the resources that would be useful to thrive as a great mentor in  " + programTitle + ". <br /><br />" +
+                " To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
+        return message;
+    }
+    private String buildRejectedEmailMessage(Mentor mentor, String programTitle) {
+        String message = "Dear " + mentor.getProfile().getName() + ",<br /><br />" +
+                "I hope this email finds you well. I wanted to take a moment to thank you for your interest in joining " + programTitle + " as a mentor and for submitting your application. We appreciate the time and effort you put into it.<br /><br />"+
+                "After careful review of your application and considering all of the candidates, we regret to inform you that we are unable to make you part of the mentor base at this time. We received a large number "+
+                "of qualified applicants, and unfortunately, we could only accept a limited number of Mentors.<br /><br />" +
+                "We understand that this news may be disappointing, and we encourage you to not be discouraged by this decision. Please know that this does not "+
+                "reflect on your abilities, potential or value as an individual. As you progress ahead on your academic or professional journey, we would be glad to have you as a mentor for future ScholarX programs.<br /><br />"+
+                "We appreciate your interest in our program and would like to wish you all the best in your future endeavors. We are grateful for the opportunity "+
+                "to consider you for our program and encourage you to keep pursuing your goals and aspirations.<br /><br />" +
+                "Thank you again for considering our program and for the time you invested in your application. We hope you find success and fulfillment in your academic and professional pursuits." +
+                " To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
+        return message;
+    }
+    private void sendAndSaveEmail(Mentor mentor, String message, String subject, Program program) throws IOException {
+        emailService.sendEmail(mentor.getProfile().getEmail(), subject, message, false);
+
+        SentEmail email = new SentEmail();
+        email.setEmail(mentor.getProfile().getEmail());
+        email.setMessage(message);
+        email.setProgramId(program);
+        email.setReceiver(mentor.getProfile());
+        email.setState(program.getState());
+        emailRepository.save(email);
     }
 
     public void sendMenteeFiltrationEmails(long id, Optional<Program> program) throws MessagingException, IOException {
