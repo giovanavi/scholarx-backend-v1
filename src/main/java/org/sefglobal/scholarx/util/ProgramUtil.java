@@ -163,76 +163,63 @@ public class ProgramUtil {
         List<Mentee> discardedMentees = menteeRepository.findAllByProgramIdAndState(id, EnrolmentState.FAILED_FROM_WILDCARD);
 
         for (Mentor mentor : approvedMentors) {
-
-            String message = "Dear " + mentor.getProfile().getName() + ",<br /><br />" +
-                    "<b>Congratulations!</b><br />Your list of students is now finalised. " +
-                    "You can check your mentees and their contact details by visiting the <b>ScholarX dashboard.</b> " +
-                    "Please make the first contact with them as we have instructed them to wait for your email. " +
-                    "To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
-
-            String logMsg = "Email sent to mentor " + mentor.getProfile().getName() + " " +
-                            "of " + mentor.getProfile().getEmail();
-            log.info(logMsg);
-
-            emailService.sendEmail(mentor.getProfile().getEmail(), program.get().getTitle(), message, true);
-
-            SentEmail email = new SentEmail();
-            email.setEmail(mentor.getProfile().getEmail());
-            email.setMessage(message);
-            email.setProgramId(program.get());
-            email.setReceiver(mentor.getProfile());
-            email.setState(program.get().getState());
-            emailRepository.save(email);
+            String message = buildMentorMessage(mentor);
+            sendEmailAndSaveRecord(mentor.getProfile(), program.get(), message);
         }
 
         for (Mentee mentee: approvedMentees) {
-            String message = "Dear " + mentee.getProfile().getName() + ",<br /><br />" +
-            "We are delighted to inform you that you have been selected for our undergraduate program, and we extend our heartfelt congratulations to you!"+ "<br /><br />"+
-            "We received a large number of qualified applicants, and after a thorough review of all candidates, we are thrilled to offer you a place in our program. Your application stood out amongst the others, and we are confident that you will contribute positively to our program." + "<br /><br />"+
-            "We believe that you have great potential to succeed in your academic and professional pursuits, and we are excited to have you join our community of learners and scholars." + "<br /><br />"+
-            "To emphasize the importance of completing the program, you have received a valuable opportunity. If, for any reason, you are uncertain about completing the program within the 6-month timeline, please inform our admissions team as soon as possible, so we can provide the opportunity to another deserving student."+"<br /><br />"+
-            "Once again, congratulations on your selection! We cannot wait to have you on board. " +
-            "To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
-
-            String logMsg = "Email sent to mentee " + mentee.getProfile().getName() + " " +
-                        "of " + mentee.getProfile().getEmail();
-
-            log.info(logMsg);
-
-            emailService.sendEmail(mentee.getProfile().getEmail(), program.get().getTitle(), message, true);
-
-            SentEmail email = new SentEmail();
-            email.setEmail(mentee.getProfile().getEmail());
-            email.setMessage(message);
-            email.setProgramId(program.get());
-            email.setReceiver(mentee.getProfile());
-            email.setState(program.get().getState());
-            emailRepository.save(email);
+            String message = buildMenteeApprovedMessage(mentee);
+            sendEmailAndSaveRecord(mentee.getProfile(), program.get(), message);
         }
 
         for (Mentee mentee: discardedMentees) {
-            String message = "Dear " + mentee.getProfile().getName() + ",<br /><br />" +
-            "We wanted to take a moment to thank you for your interest in the ScholarX program and for submitting your application. We appreciate the time and effort you put into it."+ "<br /><br />" +
-            "After a careful review of your application and considering all of the candidates, we regret to inform you that we are unable to offer you admission at this time. We received a large number of qualified applicants, and unfortunately, we could only accept a limited number of students." + "<br /><br />" +
-            "However, we want to encourage you not to be discouraged by this decision. We recognize that the admissions process can be competitive, and we understand that this news may be disappointing. Please know that this does not reflect on your abilities, potential, or value as an individual." + "<br /><br />" +
-            "We do offer the possibility for you to apply again next year if you meet the eligibility criteria. We invite you to stay engaged with us by attending our events, reaching out to our admissions team, and taking advantage of any opportunities to connect with our current students and alumni." + "<br /><br />" +
-            "Thank you again for considering our program and for the time you invested in your application. We wish you all the best in your future endeavours." +
-            " To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
-
-            String logMsg = "Email sent to mentee " + mentee.getProfile().getName() + " " +
-                            "of " + mentee.getProfile().getEmail();
-            log.info(logMsg);
-
-            emailService.sendEmail(mentee.getProfile().getEmail(), program.get().getTitle(), message, true);
-
-            SentEmail email = new SentEmail();
-            email.setEmail(mentee.getProfile().getEmail());
-            email.setMessage(message);
-            email.setProgramId(program.get());
-            email.setReceiver(mentee.getProfile());
-            email.setState(program.get().getState());
-            emailRepository.save(email);
+            String message = buildMenteeDiscardedMessage(mentee);
+            sendEmailAndSaveRecord(mentee.getProfile(), program.get(), message);
         }
+    }
+    private String buildMentorMessage(Mentor mentor) {
+        String message = "Dear " + mentor.getProfile().getName() + ",<br /><br />" +
+                "<b>Congratulations!</b><br />Your list of students is now finalised. " +
+                "You can check your mentees and their contact details by visiting the <b>ScholarX dashboard.</b> " +
+                "Please make the first contact with them as we have instructed them to wait for your email. " +
+                "To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
+        return message;
+    }
+    private String buildMenteeApprovedMessage(Mentee mentee) {
+        String message = "Dear " + mentee.getProfile().getName() + ",<br /><br />" +
+                "We are delighted to inform you that you have been selected for our undergraduate program, and we extend our heartfelt congratulations to you!"+ "<br /><br />"+
+                "We received a large number of qualified applicants, and after a thorough review of all candidates, we are thrilled to offer you a place in our program. Your application stood out amongst the others, and we are confident that you will contribute positively to our program." + "<br /><br />"+
+                "We believe that you have great potential to succeed in your academic and professional pursuits, and we are excited to have you join our community of learners and scholars." + "<br /><br />"+
+                "To emphasize the importance of completing the program, you have received a valuable opportunity. If, for any reason, you are uncertain about completing the program within the 6-month timeline, please inform our admissions team as soon as possible, so we can provide the opportunity to another deserving student."+"<br /><br />"+
+                "Once again, congratulations on your selection! We cannot wait to have you on board. " +
+                "To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
+        return message;
+    }
+    private String buildMenteeDiscardedMessage(Mentee mentee) {
+        String message = "Dear " + mentee.getProfile().getName() + ",<br /><br />" +
+                "We wanted to take a moment to thank you for your interest in the ScholarX program and for submitting your application. We appreciate the time and effort you put into it."+ "<br /><br />" +
+                "After a careful review of your application and considering all of the candidates, we regret to inform you that we are unable to offer you admission at this time. We received a large number of qualified applicants, and unfortunately, we could only accept a limited number of students." + "<br /><br />" +
+                "However, we want to encourage you not to be discouraged by this decision. We recognize that the admissions process can be competitive, and we understand that this news may be disappointing. Please know that this does not reflect on your abilities, potential, or value as an individual." + "<br /><br />" +
+                "We do offer the possibility for you to apply again next year if you meet the eligibility criteria. We invite you to stay engaged with us by attending our events, reaching out to our admissions team, and taking advantage of any opportunities to connect with our current students and alumni." + "<br /><br />" +
+                "Thank you again for considering our program and for the time you invested in your application. We wish you all the best in your future endeavours." +
+                " To ensure that you receive our emails and they do not go to your spam folder, please add sustainableedufoundation@gmail.com to your email whitelist.";
+        return message;
+    }
+    private void sendEmailAndSaveRecord(Profile recipient, Program program, String message) throws IOException {
+        String profileEmail = recipient.getEmail();
+        String programTitle = program.getTitle();
+
+        emailService.sendEmail(profileEmail, programTitle, message, true);
+
+        SentEmail email = new SentEmail();
+        email.setEmail(profileEmail);
+        email.setMessage(message);
+        email.setProgramId(program);
+        email.setReceiver(recipient);
+        email.setState(program.getState());
+        emailRepository.save(email);
+
+        log.info("Email sent to " + recipient.getName() + " of " + profileEmail);
     }
 
     public void sendConfirmationEmails(long profileId, Optional<Program> program) throws MessagingException, IOException {
