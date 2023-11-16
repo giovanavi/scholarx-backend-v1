@@ -24,6 +24,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 @Entity
 @Table(name = "profile")
+@Data
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt", "enrolledUsers",
         "authenticationContextClass", "nonce", "subject", "issuer",
         "audience", "expiresAt", "issuedAt", "authenticatedAt",
@@ -70,85 +71,6 @@ public class Profile extends BaseScholarxModel implements OidcUser {
   @OneToMany(mappedBy = "profile")
   private List<EnrolledUser> enrolledUsers = new ArrayList<>();
 
-  public String getUid() {
-    return uid;
-  }
-
-  public void setUid(String uid) {
-    this.uid = uid;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public String getFirstName() {
-    return firstName;
-  }
-
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  public String getLastName() {
-    return lastName;
-  }
-
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
-
-  public String getImageUrl() {
-    return imageUrl;
-  }
-
-  public void setImageUrl(String imageUrl) {
-    this.imageUrl = imageUrl;
-  }
-
-  public void setLinkedinUrl(String linkedinUrl) {
-    this.linkedinUrl = linkedinUrl;
-  }
-
-  public String getLinkedinUrl() {
-    return linkedinUrl;
-  }
-
-  public String getHeadline() {
-    return headline;
-  }
-
-  public void setHeadline(String headline) {
-    this.headline = headline;
-  }
-
-  public ProfileType getType() {
-    return type;
-  }
-
-  public void setType(ProfileType type) {
-    this.type = type;
-  }
-
-  public List<EnrolledUser> getEnrolledUsers() {
-    return enrolledUsers;
-  }
-
-  public void setEnrolledUsers(List<EnrolledUser> enrolledUsers) {
-    this.enrolledUsers = enrolledUsers;
-  }
-
-  public Boolean getHasConfirmedUserDetails() {
-    return hasConfirmedUserDetails;
-  }
-
-  public void setHasConfirmedUserDetails(Boolean hasConfirmedUserDetails) {
-    this.hasConfirmedUserDetails = hasConfirmedUserDetails;
-  }
 
   @Override
   public Map<String, Object> getAttributes() {
